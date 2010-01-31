@@ -106,7 +106,7 @@ BluetoothDeviceInquiry::~BluetoothDeviceInquiry()
 
 void BluetoothDeviceInquiry::start()
 {
-    //[impl->deviceInquiry start];
+    [impl->deviceInquiry start];
 }
 
 void BluetoothDeviceInquiry::stop()
