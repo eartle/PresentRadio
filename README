@@ -1,0 +1,18 @@
+This is my attempt at a hack for http://stockholm.musichackday.org
+
+The wiki page about our hack is here: http://stockholm.musichackday.org/index.php?page=ProximRadio+-+Blobble+-+Blobbler
+
+Instructions:
+Sign in with your Last.fm details on the settings tab.
+
+Play you personal Last.fm library on the radio tab.
+
+If a bluetooth device is found with a device name in the format lfm-<Last.fm username>, PresentRadio will be retuned to be a combination of your Last.fm libraries.  Everyone listening to the radio is happy!
+
+Note:
+PresentRadio will only build on Mac OSX at the moment, mainly because of the bluetooth APIs, but I'll see if I can get it running on windows later.
+
+This project uses:
+liblastfm - for playing Last.fm radio and scrobbling.
+qjson http://qjson.sourceforge.net/ - for parsing the json response from Echonest's alpha_search_tracks.
+The apple bluetooth framework.
