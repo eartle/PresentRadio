@@ -51,7 +51,7 @@ private slots:
     void onGetModeFinished();
     void onGetTempoFinished();
     void onGetLoudnessFinished();
-    void onBlobbleReply();
+    void onBlobbleRequestFinished();
 
 private:
     Ui::MainWindow *ui;

@@ -108,7 +108,7 @@ void MainWindow::onDevicesFound()
     QTimer::singleShot(1 * 60 * 1000, this, SLOT(onTimerComplete()));
 }
 
-void MainWindow::onBlobbleReply()
+void MainWindow::onBlobbleRequestFinished()
 {
     QByteArray data = m_blobbleReply->readAll();
 }
