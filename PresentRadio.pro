@@ -7,7 +7,7 @@ QT += network \
 
 TARGET = PresentRadio
 TEMPLATE = app
-LIBS += -llastfm -lqjson
+LIBS += -llastfm
 
 mac { 
     HEADERS += BluetoothDeviceInquiryMac.h \

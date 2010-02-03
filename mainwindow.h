@@ -46,11 +46,6 @@ private slots:
     void onTick(qint64 tick);
     void onGetInfoFinished();
     void onArtworkFinished();
-    void onGetDataFinished();
-    void onGetKeyFinished();
-    void onGetModeFinished();
-    void onGetTempoFinished();
-    void onGetLoudnessFinished();
     void onBlobbleRequestFinished();
 
 private:

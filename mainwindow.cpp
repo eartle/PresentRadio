@@ -216,136 +216,6 @@ void MainWindow::onTrackSpooled(const lastfm::Track& track)
 
     // send the now playing and cache the track so it can be submitted later
     m_audioscrobbler->nowPlaying(track);
-
-    // get the echo nest data
-
-    QUrl getDataUrl("http://developer.echonest.com/api/alpha_search_tracks");
-    getDataUrl.addQueryItem("api_key", "WXIBWBKX8K0E7DSQ0");
-    getDataUrl.addQueryItem("title", track.title());
-    getDataUrl.addQueryItem("artist", track.artist());
-    QNetworkRequest* getDataRequest = new QNetworkRequest(getDataUrl);
-
-    m_getDataReply = m_networkManager.get(*getDataRequest);
-    connect(m_getDataReply, SIGNAL(finished()), SLOT(onGetDataFinished()));
-}
-
-void MainWindow::onGetDataFinished()
-{
-    QByteArray data = m_getDataReply->readAll();
-    qDebug() << data;
-
-    QJson::Parser parser;
-
-    bool ok;
-    QVariantMap response = parser.parse(data, &ok).toMap();
-
-    if (ok)
-    {
-        QVariant results = response["results"];
-
-        qDebug() << results.toString();
-
-        QString trackID;
-
-        if (results.toList().count() > 0)
-        {
-            trackID = results.toList().at(0).toMap()["trackID"].toString();
-        }
-
-        {
-            QUrl getKeyUrl("http://developer.echonest.com/api/get_key");
-            getKeyUrl.addQueryItem("api_key", "WXIBWBKX8K0E7DSQ0");
-            getKeyUrl.addQueryItem("id", "music://id.echonest.com/~/TR/" + trackID);
-            getKeyUrl.addQueryItem("version", "3");
-
-            QNetworkRequest* getKeyRequest = new QNetworkRequest(getKeyUrl);
-            m_getKeyReply = m_networkManager.get(*getKeyRequest);
-            connect(m_getKeyReply, SIGNAL(finished()), SLOT(onGetKeyFinished()));
-        }
-
-        {
-            QUrl getUrl("http://developer.echonest.com/api/get_mode");
-            getUrl.addQueryItem("api_key", "WXIBWBKX8K0E7DSQ0");
-            getUrl.addQueryItem("id", "music://id.echonest.com/~/TR/" + trackID);
-            getUrl.addQueryItem("version", "3");
-
-            QNetworkRequest* getRequest = new QNetworkRequest(getUrl);
-            m_getModeReply = m_networkManager.get(*getRequest);
-            connect(m_getModeReply, SIGNAL(finished()), SLOT(onGetModeFinished()));
-        }
-
-        {
-            QUrl getUrl("http://developer.echonest.com/api/get_loudness");
-            getUrl.addQueryItem("api_key", "WXIBWBKX8K0E7DSQ0");
-            getUrl.addQueryItem("id", "music://id.echonest.com/~/TR/" + trackID);
-            getUrl.addQueryItem("version", "3");
-
-            QNetworkRequest* getRequest = new QNetworkRequest(getUrl);
-            m_getLoudnessReply = m_networkManager.get(*getRequest);
-            connect(m_getLoudnessReply, SIGNAL(finished()), SLOT(onGetLoudnessFinished()));
-        }
-
-        {
-            QUrl getUrl("http://developer.echonest.com/api/get_tempo");
-            getUrl.addQueryItem("api_key", "WXIBWBKX8K0E7DSQ0");
-            getUrl.addQueryItem("id", "music://id.echonest.com/~/TR/" + trackID);
-            getUrl.addQueryItem("version", "3");
-
-            QNetworkRequest* getRequest = new QNetworkRequest(getUrl);
-            m_getTempoReply = m_networkManager.get(*getRequest);
-            connect(m_getTempoReply, SIGNAL(finished()), SLOT(onGetTempoFinished()));
-        }
-    }
-}
-
-void MainWindow::onGetKeyFinished()
-{
-    QDomDocument document;
-    document.setContent(m_getKeyReply->readAll());
-
-    QMap<QString, QString> keyMap;
-    keyMap.insert("0", "C");
-    keyMap.insert("1", "C#");
-    keyMap.insert("2", "D");
-    keyMap.insert("3", "Eb");
-    keyMap.insert("4", "E");
-    keyMap.insert("5", "F");
-    keyMap.insert("6", "Gb");
-    keyMap.insert("7", "G");
-    keyMap.insert("8", "G#");
-    keyMap.insert("9", "A");
-    keyMap.insert("10", "Bb");
-    keyMap.insert("11", "B");
-
-    ui->keyValue->setText(keyMap[document.documentElement().elementsByTagName("analysis").at(0).toElement().elementsByTagName("key").at(0).toElement().text()]);
-}
-
-void MainWindow::onGetLoudnessFinished()
-{
-    QDomDocument document;
-    document.setContent(m_getLoudnessReply->readAll());
-
-    ui->loudnessValue->setText(document.documentElement().elementsByTagName("analysis").at(0).toElement().elementsByTagName("loudness").at(0).toElement().text() + " Decibels");
-}
-
-void MainWindow::onGetModeFinished()
-{
-    QDomDocument document;
-    document.setContent(m_getModeReply->readAll());
-
-    QMap<QString, QString> modeMap;
-    modeMap.insert("0", "Minor");
-    modeMap.insert("1", "Minor");
-
-    ui->modeValue->setText(modeMap[document.documentElement().elementsByTagName("analysis").at(0).toElement().elementsByTagName("mode").at(0).toElement().text()]);
-}
-
-void MainWindow::onGetTempoFinished()
-{
-    QDomDocument document;
-    document.setContent(m_getTempoReply->readAll());
-
-    ui->tempoValue->setText(document.documentElement().elementsByTagName("analysis").at(0).toElement().elementsByTagName("tempo").at(0).toElement().text());
 }
 
 void MainWindow::onGetInfoFinished()
@@ -363,7 +233,7 @@ void MainWindow::onArtworkFinished()
 {
     QPixmap artwork;
     artwork.loadFromData(m_artworkReply->readAll());
-    ui->artwork->setPixmap(artwork);
+    ui->artwork->setPixmap(artwork.scaled(QSize(300, 300), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 lastfm::RadioStation MainWindow::stationFromPresent() const
@@ -378,7 +248,7 @@ lastfm::RadioStation MainWindow::stationFromPresent() const
             && deviceName.startsWith("lfm-")
             && deviceName.mid(4) != QString(lastfm::ws::Username) )
         {
-            rql += " and user:" + m_deviceModel->deviceAt(i).name.mid(4);
+            rql += " or user:" + m_deviceModel->deviceAt(i).name.mid(4);
         }
     }
 
@@ -405,8 +275,8 @@ void MainWindow::onPlayStopClicked(bool checked)
         ui->skip->setEnabled(false);
         ui->artwork->setPixmap(QPixmap());
         ui->album->setText("Album");
-        ui->title->setText("title");
-        ui->artist->setAcceptDrops("Artist");
+        ui->title->setText("Title");
+        ui->artist->setText("Artist");
         ui->trackProgress->setValue(0);
     }
 }
