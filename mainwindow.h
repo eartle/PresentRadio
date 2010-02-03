@@ -12,10 +12,9 @@
 
 class QNetworkReply;
 
-namespace lastfm {class Audioscrobbler;}
-
 class CocoaInitializer;
 class BluetoothDeviceModel;
+class ScrobSocket;
 
 namespace Ui {
     class MainWindow;
@@ -51,8 +50,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    bool m_scrobbled;
-
     QSettings m_settings;
 
     BluetoothDeviceModel* m_deviceModel;
@@ -61,7 +58,7 @@ private:
     CocoaInitializer* m_cocoaInitializer;
 
     Radio m_radio;
-    lastfm::Audioscrobbler* m_audioscrobbler;
+    ScrobSocket* m_scrobSocket;
 
     QString m_password;
 

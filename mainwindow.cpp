@@ -7,8 +7,6 @@
 
 #include <qjson/parser.h>
 
-#include <lastfm/Audioscrobbler>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -16,12 +14,12 @@
 #include "bluetoothdeviceinquiryinterface.h"
 #include "CocoaInitializer.h"
 #include "bluetoothdevicemodel.h"
+#include "ScrobSocket.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_settings("Coffey", "PresentRadio"),
-    m_scrobbled(false)
+    m_settings("Coffey", "PresentRadio")
 {
     ui->setupUi(this);
 
@@ -125,17 +123,6 @@ void MainWindow::onTimerComplete()
 void MainWindow::onTick(qint64 tick)
 {
     ui->trackProgress->setValue(tick / 1000);
-
-    if (!m_scrobbled)
-    {
-        if (( (tick / 1000) > (m_radio.currentTrack().duration() / 2)
-            || (tick / 1000) > (4 * 60) )
-            && (m_radio.currentTrack().duration() > 30) )
-        {
-            m_audioscrobbler->cache(m_radio.currentTrack());
-            m_scrobbled = true;
-        }
-    }
 }
 
 void MainWindow::onUsernameChanged(const QString& username)
@@ -187,7 +174,9 @@ void MainWindow::onGetMobileSessionFinished()
         ui->status->setText("Online");
         ui->playStop->setEnabled(true);
 
-        m_audioscrobbler = new lastfm::Audioscrobbler("tst");
+        m_scrobSocket = new ScrobSocket("tst", this);
+        connect(&m_radio, SIGNAL(trackSpooled(Track)), m_scrobSocket, SLOT(start(Track)));
+        connect(&m_radio, SIGNAL(stopped()), m_scrobSocket, SLOT(stop()));
     }
     else
     {
@@ -197,11 +186,6 @@ void MainWindow::onGetMobileSessionFinished()
 
 void MainWindow::onTrackSpooled(const lastfm::Track& track)
 {
-    m_scrobbled = false;
-
-    // submit any previous tracks
-    m_audioscrobbler->submit();
-
     setWindowTitle(m_radio.station().rql());
 
     ui->trackProgress->setMinimum(0);
@@ -215,7 +199,7 @@ void MainWindow::onTrackSpooled(const lastfm::Track& track)
     connect(m_trackGetInfoReply, SIGNAL(finished()), SLOT(onGetInfoFinished()));
 
     // send the now playing and cache the track so it can be submitted later
-    m_audioscrobbler->nowPlaying(track);
+    m_scrobSocket->start(track);
 }
 
 void MainWindow::onGetInfoFinished()
@@ -257,8 +241,6 @@ lastfm::RadioStation MainWindow::stationFromPresent() const
 
 void MainWindow::onPlayStopClicked(bool checked)
 {
-    m_scrobbled = false;
-
     if (checked)
     {
         // start playing the radio for all the users that are present

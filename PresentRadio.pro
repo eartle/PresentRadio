@@ -25,11 +25,13 @@ mac {
 SOURCES += main.cpp \
     mainwindow.cpp \
     bluetoothdevicemodel.cpp \
-    radio.cpp
+    radio.cpp \
+    ScrobSocket.cpp
 
 HEADERS += mainwindow.h \
     bluetoothdeviceinquiryinterface.h \
     bluetoothdevicemodel.h \
-    radio.h
+    radio.h \
+    ScrobSocket.h
 
 FORMS += mainwindow.ui
