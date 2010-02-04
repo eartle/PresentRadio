@@ -4,11 +4,9 @@
 QT += network \
     xml \
     phonon
-
 TARGET = PresentRadio
 TEMPLATE = app
 LIBS += -llastfm
-
 mac { 
     HEADERS += BluetoothDeviceInquiryMac.h \
         CocoaInitializer.h
@@ -21,17 +19,17 @@ mac {
         -framework \
         AppKit
 }
-
 SOURCES += main.cpp \
     mainwindow.cpp \
     bluetoothdevicemodel.cpp \
     radio.cpp \
-    ScrobSocket.cpp
-
+    ScrobSocket.cpp \
+    login.cpp
 HEADERS += mainwindow.h \
     bluetoothdeviceinquiryinterface.h \
     bluetoothdevicemodel.h \
     radio.h \
-    ScrobSocket.h
-
-FORMS += mainwindow.ui
+    ScrobSocket.h \
+    login.h
+FORMS += mainwindow.ui \
+    login.ui
